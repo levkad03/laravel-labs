@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Task;
 use Illuminate\Validation\Rule;
+use App\Events\TaskCreated;
 
 class TaskController extends Controller
 {
@@ -32,6 +33,8 @@ class TaskController extends Controller
         ]);
 
         $task = Task::create($validated);
+
+        event(new TaskCreated($task));
 
         return response()->json($task, 201);
     }

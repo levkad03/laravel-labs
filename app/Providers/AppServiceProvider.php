@@ -23,4 +23,10 @@ class AppServiceProvider extends ServiceProvider
     {
         Task::observe(TaskObserver::class);
     }
+
+    protected $listen = [
+        \App\Events\TaskCreated::class => [
+            \App\Listeners\NotifyAssignee::class,
+        ],
+    ];
 }
