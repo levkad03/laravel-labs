@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Task;
+use Illuminate\Validation\Rule;
 
 class TaskController extends Controller
 {
@@ -11,7 +13,7 @@ class TaskController extends Controller
      */
     public function index()
     {
-        //
+        return response()->json(Task::all());
     }
 
     /**
@@ -19,7 +21,18 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'status' => ['required', Rule::in(['new', 'in_progress', 'done'])],
+            'project_id' => ['required', 'exists:projects,id'],
+            'assignee_id' => ['nullable', 'exists:users,id'],
+            'due_date' => ['nullable', 'date'],
+        ]);
+
+        $task = Task::create($validated);
+
+        return response()->json($task, 201);
     }
 
     /**
@@ -27,7 +40,8 @@ class TaskController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $task = Task::findOrFail($id);
+        return response()->json($task);
     }
 
     /**
@@ -35,7 +49,20 @@ class TaskController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $task = Task::findOrFail($id);
+
+        $validated = $request->validate([
+            'title' => ['sometimes', 'required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'status' => ['sometimes', Rule::in(['new', 'in_progress', 'done'])],
+            'project_id' => ['sometimes', 'exists:projects,id'],
+            'assignee_id' => ['nullable', 'exists:users,id'],
+            'due_date' => ['nullable', 'date'],
+        ]);
+
+        $task->update($validated);
+
+        return response()->json($task);
     }
 
     /**
@@ -43,6 +70,9 @@ class TaskController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $task = Task::findOrFail($id);
+        $task->delete();
+
+        return response()->json(['message' => 'Task deleted']);
     }
 }
