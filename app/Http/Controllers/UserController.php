@@ -54,7 +54,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'email' => ['sometimes', 'required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'password' => ['nullable', 'string', 'min:6'],
+            'password' => ['sometimes', 'nullable', 'string', 'min:6'],
         ]);
 
         if (!empty($validated['password'])) {
