@@ -26,8 +26,9 @@ class TaskController extends Controller
             'description' => ['nullable', 'string'],
             'status' => ['required', Rule::in(['new', 'in_progress', 'done'])],
             'project_id' => ['required', 'exists:projects,id'],
-            'assignee_id' => ['nullable', 'exists:users,id'],
+            'assigned_to' => ['nullable', 'exists:users,id'],
             'due_date' => ['nullable', 'date'],
+            'author_id' => ['required', 'exists:users,id'],
         ]);
 
         $task = Task::create($validated);
@@ -53,11 +54,12 @@ class TaskController extends Controller
 
         $validated = $request->validate([
             'title' => ['sometimes', 'required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'status' => ['sometimes', Rule::in(['new', 'in_progress', 'done'])],
-            'project_id' => ['sometimes', 'exists:projects,id'],
-            'assignee_id' => ['nullable', 'exists:users,id'],
-            'due_date' => ['nullable', 'date'],
+            'description' => ['sometimes', 'nullable', 'string'],
+            'status' => ['sometimes', 'required', Rule::in(['new', 'in_progress', 'done'])],
+            'project_id' => ['sometimes', 'required', 'exists:projects,id'],
+            'assigned_to' => ['sometimes', 'nullable', 'exists:users,id'],
+            'due_date' => ['sometimes', 'nullable', 'date'],
+            'author_id' => ['sometimes', 'required', 'exists:users,id'],
         ]);
 
         $task->update($validated);
