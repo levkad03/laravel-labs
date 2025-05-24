@@ -24,13 +24,10 @@ class ProjectController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'user_id' => ['required', 'exists:users,id'],
         ]);
 
-        $project = Project::create([
-            'name' => $validated['name'],
-            'description' => $validated['description'] ?? '',
-            'user_id' => 1, // Should be Auth::id(), but 1 for now
-        ]);
+        $project = Project::create($validated);
 
         return response()->json($project, 201);
     }
@@ -40,7 +37,8 @@ class ProjectController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $project = Project::findOrFail($id);
+        return response()->json($project);
     }
 
     /**
@@ -48,7 +46,17 @@ class ProjectController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $project = Project::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'user_id' => ['sometimes', 'exists:users,id'],
+        ]);
+
+        $project->update($validated);
+
+        return response()->json($project);
     }
 
     /**
@@ -56,6 +64,9 @@ class ProjectController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $project = Project::findOrFail($id);
+        $project->delete();
+
+        return response()->json(['message' => 'Project was deleted successfully']);
     }
 }
