@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Comment;
 
 class CommentController extends Controller
 {
@@ -11,7 +12,7 @@ class CommentController extends Controller
      */
     public function index()
     {
-        //
+        return response()->json(Comment::all());
     }
 
     /**
@@ -19,7 +20,15 @@ class CommentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'task_id' => ['required', 'exists:tasks,id'],
+            'user_id' => ['required', 'exists:users,id'],
+            'content' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $comment = Comment::create($validated);
+
+        return response()->json($comment, 201);
     }
 
     /**
@@ -27,7 +36,8 @@ class CommentController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $comment = Comment::findOrFail($id);
+        return response()->json($comment);
     }
 
     /**
@@ -35,7 +45,17 @@ class CommentController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $comment = Comment::findOrFail($id);
+
+        $validated = $request->validate([
+            'task_id' => ['sometimes', 'exists:tasks,id'],
+            'user_id' => ['sometimes', 'exists:users,id'],
+            'content' => ['sometimes', 'string', 'max:1000'],
+        ]);
+
+        $comment->update($validated);
+
+        return response()->json($comment);
     }
 
     /**
@@ -43,6 +63,9 @@ class CommentController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $comment = Comment::findOrFail($id);
+        $comment->delete();
+
+        return response()->json(['message' => 'Comment deleted']);
     }
 }
